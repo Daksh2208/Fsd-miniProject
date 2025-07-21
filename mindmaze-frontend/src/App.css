@@ -1,0 +1,580 @@
+/* App.css - MindMaze Game Styling */
+/* This file assumes index.css contains the base React app styles */
+
+/* Override body background for the game */
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* Main App Container */
+.app {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Pattern */
+.app::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header Styles */
+.container > h1 {
+  text-align: center;
+  color: #ffffff;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #00d4ff, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* User Info Section */
+.user-info {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.user-info p {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.user-info strong {
+  color: #00d4ff;
+  font-weight: 600;
+}
+
+/* Status Indicator */
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status.connected {
+  background: linear-gradient(45deg, #00ff88, #00d4ff);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.status.disconnected {
+  background: linear-gradient(45deg, #ff4757, #ff3838);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+}
+
+.status.error {
+  background: linear-gradient(45deg, #ff6b6b, #ff5252);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+}
+
+/* Message Styles */
+.message {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  padding: 15px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  font-weight: 500;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button Styles */
+.play-button, .refresh-button {
+  background: linear-gradient(45deg, #00d4ff, #0099cc);
+  color: #ffffff;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.play-button:hover, .refresh-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+  background: linear-gradient(45deg, #0099cc, #00d4ff);
+}
+
+.play-button:active, .refresh-button:active {
+  transform: translateY(0);
+}
+
+/* Logout Button Styles */
+.logout-btn {
+  background: linear-gradient(45deg, #ff4757, #ff3838);
+  color: #ffffff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 10px 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.logout-button:hover {
+  background: linear-gradient(45deg, #ff3838, #ff4757);
+  box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+  transform: translateY(-2px);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+}
+
+/* Menu Layout */
+.menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.menu > button {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+/* Leaderboard Styles */
+.leaderboard {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard h3 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  background: linear-gradient(45deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.leaderboard-item:first-child {
+  background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.2));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.leaderboard-item:nth-child(2) {
+  background: linear-gradient(45deg, rgba(192, 192, 192, 0.2), rgba(169, 169, 169, 0.2));
+  border: 1px solid rgba(192, 192, 192, 0.3);
+}
+
+.leaderboard-item:nth-child(3) {
+  background: linear-gradient(45deg, rgba(205, 127, 50, 0.2), rgba(184, 115, 51, 0.2));
+  border: 1px solid rgba(205, 127, 50, 0.3);
+}
+
+.rank {
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 1.1rem;
+  min-width: 40px;
+}
+
+.username {
+  color: #ffffff;
+  font-weight: 500;
+  flex-grow: 1;
+  margin-left: 15px;
+}
+
+.score {
+  color: #00d4ff;
+  font-weight: 600;
+  background: rgba(0, 212, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* Stats Section */
+.stats {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.stats h3 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  background: linear-gradient(45deg, #00ff88, #00d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.stats-grid div {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 10px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stats-grid div:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Waiting Screen */
+.waiting {
+  text-align: center;
+  padding: 50px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.waiting h2 {
+  color: #ffffff;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  background: linear-gradient(45deg, #00d4ff, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.waiting p {
+  color: #ffffff;
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.waiting button {
+  background: linear-gradient(45deg, #ff4757, #ff3838);
+  color: #ffffff;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.waiting button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+}
+
+/* Spinner Animation */
+.spinner {
+  font-size: 3rem;
+  color: #00d4ff;
+  animation: spin 1s linear infinite;
+  margin: 20px 0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Game Screen */
+.game {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.game h2 {
+  color: #ffffff;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  text-align: center;
+  background: linear-gradient(45deg, #ff6b6b, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.puzzle {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.puzzle h3 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  margin-bottom: 25px;
+  text-align: center;
+  line-height: 1.6;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.answer-section {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.answer-section input {
+  flex: 1;
+  padding: 15px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.answer-section input:focus {
+  outline: none;
+  border-color: #00d4ff;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.answer-section input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.answer-section button {
+  background: linear-gradient(45deg, #00ff88, #00d4ff);
+  color: #ffffff;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.answer-section button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+}
+
+.answer-section button:active {
+  transform: translateY(0);
+}
+
+/* Finished Screen */
+.finished {
+  text-align: center;
+  padding: 50px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.finished h2 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  background: linear-gradient(45deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: pulse 2s infinite;
+}
+
+.finished p {
+  color: #ffffff;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .container > h1 {
+    font-size: 2rem;
+  }
+  
+  .menu {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .answer-section {
+    flex-direction: column;
+  }
+  
+  .user-info {
+    padding: 15px;
+  }
+  
+  .leaderboard, .stats {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container > h1 {
+    font-size: 1.8rem;
+  }
+  
+  .user-info p {
+    font-size: 1rem;
+  }
+  
+  .leaderboard-item {
+    padding: 10px 12px;
+  }
+  
+  .username {
+    margin-left: 10px;
+  }
+  
+  .game h2 {
+    font-size: 1.5rem;
+  }
+  
+  .puzzle h3 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .container > h1 {
+    background: #ffffff;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .user-info, .leaderboard, .stats, .game, .waiting, .finished {
+    border: 2px solid #ffffff;
+  }
+}
