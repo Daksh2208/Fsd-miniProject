@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Brain, Zap, Trophy, Users, Search, Target, PartyPopper } from 'lucide-react';
 import './App.css';
 import LoginPage from './LoginPage';
+import CategoryPage from './CategoryPage';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -16,6 +17,8 @@ function App() {
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
   const [isLoading, setIsLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentView, setCurrentView] = useState('menu'); // 'menu', 'categories', 'waiting', 'playing', 'finished'
 
   const login = async (username) => {
     if (!username.trim()) {
@@ -101,21 +104,26 @@ function App() {
         setTimeout(() => setMessage(''), 2000);
       } else if (data.type === 'waiting_for_opponent') {
         setGameState('waiting');
+        setCurrentView('waiting');
         setMessage('Looking for opponent...');
       } else if (data.type === 'game_start') {
         setGameState('playing');
+        setCurrentView('playing');
         setCurrentPuzzle(data.puzzle);
         setOpponent(data.opponent);
         setMessage(`Battle started against ${data.opponent}!`);
         setTimeout(() => setMessage(''), 2000);
       } else if (data.type === 'game_end') {
         setGameState('finished');
+        setCurrentView('finished');
         setMessage(data.message);
         if (data.is_winner) {
-          setUser(prev => ({ ...prev, score: (prev.score || 0) + 10 }));
+          setUser(prev => ({ ...prev, score: (prev.score || 0) + (data.points || 0) }));
         }
         setTimeout(() => {
+          // Return to category page after game ends
           setGameState('menu');
+          setCurrentView('categories');
           setCurrentPuzzle('');
           setOpponent('');
           setAnswer('');
@@ -127,6 +135,7 @@ function App() {
         setTimeout(() => setMessage(''), 2000);
       } else if (data.type === 'opponent_disconnected') {
         setGameState('menu');
+        setCurrentView('categories');
         setMessage(data.message);
         setCurrentPuzzle('');
         setOpponent('');
@@ -134,6 +143,15 @@ function App() {
         setTimeout(() => setMessage(''), 3000);
       } else if (data.type === 'error') {
         setMessage(data.message);
+        setTimeout(() => setMessage(''), 3000);
+      } else if (data.type === 'cheating_detected') {
+        setMessage(data.message);
+        setGameState('menu');
+        setCurrentView('menu');
+        setCurrentPuzzle('');
+        setOpponent('');
+        setAnswer('');
+        setUser(prev => ({ ...prev, score: data.new_score || prev.score }));
         setTimeout(() => setMessage(''), 3000);
       }
     };
@@ -153,12 +171,29 @@ function App() {
   };
 
   const findMatch = () => {
+    // Navigate to category selection page
+    setCurrentView('categories');
+  };
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    
+    // Send match request with selected category
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: 'find_match' }));
-      setMessage('Finding opponent...');
+      ws.send(JSON.stringify({ 
+        type: 'find_match',
+        category: category.id,
+        categoryName: category.name
+      }));
+      setMessage(`Finding opponent for ${category.name}...`);
     } else {
       setMessage('Not connected to server');
     }
+  };
+
+  const handleBackToHome = () => {
+    setCurrentView('menu');
+    setSelectedCategory(null);
   };
 
   const submitAnswer = (e) => {
@@ -200,12 +235,41 @@ function App() {
     setUser(null);
     setWs(null);
     setGameState('menu');
+    setCurrentView('menu');
     setCurrentPuzzle('');
     setOpponent('');
     setAnswer('');
     setMessage('');
+    setSelectedCategory(null);
     setConnectionStatus('Disconnected');
   };
+
+  // Anti-cheating mechanism
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && gameState === 'playing' && ws && ws.readyState === WebSocket.OPEN) {
+        // User switched tabs during a live match
+        ws.send(JSON.stringify({ type: 'cheating_detected', reason: 'tab_switch' }));
+      }
+    };
+
+    const handleBlur = () => {
+      if (gameState === 'playing' && ws && ws.readyState === WebSocket.OPEN) {
+        // User left the window (e.g., opened another tab or minimized)
+        ws.send(JSON.stringify({ type: 'cheating_detected', reason: 'window_blur' }));
+      }
+    };
+
+    // Add event listeners for tab/window switching
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      // Clean up event listeners
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [gameState, ws]);
 
   useEffect(() => {
     loadLeaderboard();
@@ -244,6 +308,17 @@ function App() {
     );
   }
 
+  // Category selection view
+  if (currentView === 'categories') {
+    return (
+      <CategoryPage 
+        onSelectCategory={handleCategorySelect}
+        onBackToHome={handleBackToHome}
+        user={user}
+      />
+    );
+  }
+
   return (
     <div className="app">
       <div className="container">
@@ -264,7 +339,7 @@ function App() {
         
         {message && <div className="message-banner">{message}</div>}
         
-        {gameState === 'menu' && (
+        {currentView === 'menu' && (
           <div className="menu">
             <div className="menu-actions">
               <button className="play-button" onClick={findMatch}>
@@ -312,20 +387,29 @@ function App() {
           </div>
         )}
         
-        {gameState === 'waiting' && (
+        {currentView === 'waiting' && (
           <div className="waiting">
             <h2>🔍 Finding opponent...</h2>
             <div className="spinner">⟳</div>
+            <p>Looking for opponent in <strong>{selectedCategory?.name}</strong> category!</p>
             <p>Please wait while we find you an opponent!</p>
-            <button className="cancel-button" onClick={() => setGameState('menu')}>
+            <button className="cancel-button" onClick={() => {
+              setCurrentView('categories');
+              setGameState('menu');
+            }}>
               Cancel
             </button>
           </div>
         )}
         
-        {gameState === 'playing' && (
+        {currentView === 'playing' && (
           <div className="game">
             <h2>🎯 Battle vs {opponent}</h2>
+            {selectedCategory && (
+              <div className="game-category-info">
+                <p>Category: <strong>{selectedCategory.name}</strong></p>
+              </div>
+            )}
             <div className="puzzle-container">
               <div className="puzzle-question">
                 <h3>{currentPuzzle}</h3>
@@ -349,10 +433,13 @@ function App() {
           </div>
         )}
         
-        {gameState === 'finished' && (
+        {currentView === 'finished' && (
           <div className="finished">
             <h2>🎉 Game Finished!</h2>
-            <p>Returning to menu...</p>
+            {selectedCategory && (
+              <p>Category: <strong>{selectedCategory.name}</strong></p>
+            )}
+            <p>Returning to category selection...</p>
             <div className="spinner">⟳</div>
           </div>
         )}
